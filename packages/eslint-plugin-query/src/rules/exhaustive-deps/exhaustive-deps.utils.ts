@@ -1,15 +1,16 @@
 import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 import { ASTUtils } from '../../utils/ast-utils'
-import type { TSESLint } from '@typescript-eslint/utils'
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 
 export const ExhaustiveDepsUtils = {
   isRelevantReference(params: {
-    context: Readonly<TSESLint.RuleContext<string, ReadonlyArray<unknown>>>
+    sourceCode: Readonly<TSESLint.SourceCode>
     reference: TSESLint.Scope.Reference
     scopeManager: TSESLint.Scope.ScopeManager
+    node: TSESTree.Node
   }) {
-    const { reference, scopeManager, context } = params
-    const component = ASTUtils.getFunctionAncestor(context)
+    const { reference, scopeManager, sourceCode, node } = params
+    const component = ASTUtils.getFunctionAncestor(sourceCode, node)
 
     if (
       component !== undefined &&

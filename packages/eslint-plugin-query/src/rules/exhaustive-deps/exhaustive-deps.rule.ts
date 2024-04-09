@@ -83,7 +83,7 @@ export const rule = createRule({
           }
         }
 
-        const sourceCode = context.getSourceCode()
+        const sourceCode = context.sourceCode
         const queryKeyValue = queryKeyNode
         const externalRefs = ASTUtils.getExternalRefs({
           scopeManager,
@@ -93,9 +93,10 @@ export const rule = createRule({
 
         const relevantRefs = externalRefs.filter((reference) =>
           ExhaustiveDepsUtils.isRelevantReference({
-            context,
+            sourceCode,
             reference,
             scopeManager,
+            node: queryFn.value,
           }),
         )
 

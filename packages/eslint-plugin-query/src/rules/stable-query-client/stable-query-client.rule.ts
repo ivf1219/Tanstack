@@ -44,7 +44,10 @@ export const rule = createRule({
           return
         }
 
-        const fnAncestor = ASTUtils.getFunctionAncestor(context)
+        const fnAncestor = ASTUtils.getFunctionAncestor(
+          context.sourceCode,
+          node,
+        )
         const isReactServerComponent = fnAncestor?.async === true
 
         if (
