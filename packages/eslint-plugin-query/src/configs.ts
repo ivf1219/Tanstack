@@ -1,7 +1,6 @@
-import { rules } from './rules'
 import type { ESLintUtils } from '@typescript-eslint/utils'
 
-function generateRecommendedConfig(
+export function generateRecommendedConfig(
   allRules: Record<
     string,
     ESLintUtils.RuleModule<
@@ -23,11 +22,4 @@ function generateRecommendedConfig(
     },
     {} as Record<string, 'strict' | 'error' | 'warn'>,
   )
-}
-
-export const configs = {
-  recommended: {
-    plugins: ['@tanstack/eslint-plugin-query'],
-    rules: generateRecommendedConfig(rules),
-  },
 }
