@@ -1,19 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { configs } from '../configs'
+import plugin from '../'
 
 describe('configs', () => {
   it('should match snapshot', () => {
-    expect(configs).toMatchInlineSnapshot(`
+    expect(plugin.configs.recommended).toMatchInlineSnapshot(`
       {
-        "recommended": {
-          "plugins": [
-            "@tanstack/eslint-plugin-query",
-          ],
-          "rules": {
-            "@tanstack/query/exhaustive-deps": "error",
-            "@tanstack/query/no-rest-destructuring": "warn",
-            "@tanstack/query/stable-query-client": "error",
-          },
+        "plugins": [
+          "@tanstack/eslint-plugin-query",
+        ],
+        "rules": {
+          "@tanstack/query/exhaustive-deps": "error",
+          "@tanstack/query/no-rest-destructuring": "warn",
+          "@tanstack/query/stable-query-client": "error",
         },
       }
     `)
