@@ -61,7 +61,9 @@ export function injectMutation<
         }
 
         effect(() => {
-          observer.setOptions(options(queryClient))
+          observer.setOptions(
+            runInInjectionContext(currentInjector, () => options(queryClient)),
+          )
         })
 
         const result = signal(observer.getCurrentResult())
