@@ -77,7 +77,7 @@ describe('InfiniteQueryBehavior', () => {
     await waitFor(() =>
       expect(observerResult).toMatchObject({
         isFetching: false,
-        data: { pages: [1], pageParams: [1] },
+        data: { pages: [1], pageParams: [1], directions: ['forward'] },
       }),
     )
 
@@ -104,7 +104,11 @@ describe('InfiniteQueryBehavior', () => {
 
     expect(observerResult).toMatchObject({
       isFetching: false,
-      data: { pages: [1, 2], pageParams: [1, 2] },
+      data: {
+        pages: [1, 2],
+        pageParams: [1, 2],
+        directions: ['forward', 'forward'],
+      },
     })
 
     queryFnSpy.mockClear()
@@ -123,7 +127,11 @@ describe('InfiniteQueryBehavior', () => {
     // Only first two pages should be in the data
     expect(observerResult).toMatchObject({
       isFetching: false,
-      data: { pages: [0, 1], pageParams: [0, 1] },
+      data: {
+        pages: [0, 1],
+        pageParams: [0, 1],
+        directions: ['backward', 'forward'],
+      },
     })
 
     queryFnSpy.mockClear()
@@ -174,7 +182,7 @@ describe('InfiniteQueryBehavior', () => {
       queryKey: key,
       pageParam: 0,
       meta: undefined,
-      direction: 'forward',
+      direction: 'backward',
       signal: abortSignal,
     })
 
@@ -185,6 +193,89 @@ describe('InfiniteQueryBehavior', () => {
       direction: 'forward',
       signal: abortSignal,
     })
+
+    unsubscribe()
+  })
+
+  test('InfiniteQueryBehavior should use direction of the first page when refetching', async () => {
+    const key = queryKey()
+
+    const queryFnSpy = vi.fn().mockImplementation(({ pageParam }) => {
+      return pageParam
+    })
+
+    const observer = new InfiniteQueryObserver<number>(queryClient, {
+      queryKey: key,
+      queryFn: queryFnSpy,
+      getNextPageParam: (lastPage) => lastPage + 1,
+      getPreviousPageParam: (firstPage) => firstPage - 1,
+      initialPageParam: 1,
+    })
+
+    let observerResult:
+      | InfiniteQueryObserverResult<unknown, unknown>
+      | undefined
+
+    const unsubscribe = observer.subscribe((result) => {
+      observerResult = result
+    })
+
+    // Wait for the first page to be fetched
+    await waitFor(() =>
+      expect(observerResult).toMatchObject({
+        isFetching: false,
+        data: { pages: [1], pageParams: [1], directions: ['forward'] },
+      }),
+    )
+
+    expect(queryFnSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        direction: 'forward',
+      }),
+    )
+
+    queryFnSpy.mockClear()
+
+    // Fetch the second page
+    await observer.fetchPreviousPage()
+
+    expect(queryFnSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        direction: 'backward',
+      }),
+    )
+
+    expect(observerResult).toMatchObject({
+      isFetching: false,
+      data: {
+        pages: [0, 1],
+        pageParams: [0, 1],
+        directions: ['backward', 'forward'],
+      },
+    })
+
+    queryFnSpy.mockClear()
+
+    // refetch
+    await observer.refetch()
+
+    expect(queryFnSpy).toHaveBeenCalledTimes(2)
+
+    expect(queryFnSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        direction: 'backward',
+      }),
+    )
+
+    expect(queryFnSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        direction: 'forward',
+      }),
+    )
 
     unsubscribe()
   })
